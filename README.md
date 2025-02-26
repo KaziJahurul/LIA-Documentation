@@ -66,3 +66,67 @@ add_function('widgets_init', 'awesome_widget_setup');
 ```php
 <?php get_sidebar() ?>
 ```
+
+## Custom Post Type
+
+*add this to functions.php*
+
+```php
+function awesome_post_type() {
+    $labels = array(
+        'name' => 'Portfolio',
+        'singular_name' => 'Portfolio',
+        'add_new' => 'Add Portfolio Item',
+        'all_items' => 'All Items',
+        'add_new_item' => 'Add Item',
+        'edit_item' => 'Edit Item',
+        'new_item' => 'New Item',
+        'view_item' => 'View Item',
+        'search_item' => 'Search Portfolio',
+        'not_found' => 'No items found',
+        'not_found_in_trash' => 'No items found in trash',
+        'parent_item_colon' => 'Parent Item'
+    );
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'publicly_queryable' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'portfolio'),
+        'capability_type' => 'post',
+        'hierarchical' => false,
+        'supports' => array(
+            'title',
+            'editor',
+            'excerpt',
+            'thumbnail',
+            'revisions'
+        ),
+        'taxonomies' => array('category', 'post_tag'),
+        'menu_position' => 5,
+        'exclude_from_search' => false
+    );
+
+    register_post_type('portfolio', $args)
+}
+
+add_action('init', 'awesome_post_type');
+```
+
+*then add this to where you want to print the custom posts*
+
+```php
+<?php 
+
+    $args = array('post_type' => 'portfolio', 'posts_per_page' => 3);
+    $loop = new WP_Query($args);
+
+    while( $loop->have_posts()) {
+        $loop->the_post(); ?>
+
+        <?php get_template_part('content', 'archive') ?>
+        
+    <?php }
+?>
+```

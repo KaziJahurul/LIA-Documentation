@@ -130,3 +130,75 @@ add_action('init', 'awesome_post_type');
     <?php }
 ?>
 ```
+
+## Custom taxonomy
+
+```php
+function custom_taxonomies() {
+
+    // taxonomy hierarchical
+    $label = array(
+        'name' => 'Fields',
+        'singular_name' => 'Field',
+        'search_items' => 'Search Fields',
+        'all_items' => 'All Fields',
+        'parent_item' => 'Parent Field',
+        'parent_item_colon' => 'Parent Field:',
+        'edit_item' => 'Edit Field',
+        'update_item' => 'Update Field',
+        'add_new_item' => 'Add New Field',
+        'new_item_name' => 'New Field Name',
+        'menu_name' => 'Field'
+    );
+
+    $args = array(
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'field')
+    )
+
+    register_taxonomy('field', array('portfolio'), $args);
+
+    // taxonomy NOT hierarchical
+    register_taxonomy('software', 'portfolio', array(
+        'label' => 'Software',
+        'rewrite' => array('slug' => 'software'),
+        'hierarchical' => false
+    ));
+}
+
+add_action('init', 'awesome_custom_taxonomies');
+```
+
+*to display all the of the taxonomies with a link on them, you can use this function*
+
+```php
+function get_terms($postID, $term) {
+    $terms_list = wp_get_post_terms($postID, $term);
+    $output = '';
+
+    $i = 0;
+    foreach($terms_list as $term) { 
+        $i++;
+        if($i > 1) { $output .= ', '; }
+        $output .= '<a href="' . get_term_link($term) . '">' . $term->name . '</a>';
+    }
+
+    return $output;
+}
+```
+
+*and then add this to html to display all of them*
+
+```php
+<?php echo aweseme_get_terms($post->ID, 'field')?> ||
+<?php echo aweseme_get_terms($post->ID, 'software')?>
+<?php
+    if (current_user_can('manage_options')) {
+        echo '|| '; edit_post_link();
+    }
+?>
+```

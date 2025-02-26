@@ -131,7 +131,7 @@ add_action('init', 'awesome_post_type');
 ?>
 ```
 
-## Custom taxonomy
+## Custom taxonomy and term
 
 ```php
 function custom_taxonomies() {

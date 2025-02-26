@@ -202,3 +202,51 @@ function get_terms($postID, $term) {
     }
 ?>
 ```
+
+---
+
+## Add Footer and Header
+
+*add this to footer.php*
+
+```html
+<footer>
+    <div>Some footer content</div>
+</footer>
+
+<?php wp_footer() ?>
+
+</body>
+</html>
+```
+
+*add this where you want the footer to be displayed*
+
+```php
+<?php get_footer() ?>
+```
+
+*add this to header.php*
+
+```html
+<!DOCTYPE html>
+<html lang="en" <?php language_attributes(); ?>>
+<head>
+    <meta charset="UTF-8" <?php bloginfo('charset'); ?>>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php bloginfo('name'); ?> <?php wp_title('|'); ?></title>
+    <meta name="description" content="<?php bloginfo('description'); ?>">
+    <?php wp_head() ?>
+</head>
+<body <?php body_class(); ?>>
+    
+<header>
+    <div>some header content</div>
+</header>
+```
+
+*use this code where you want the header to be*
+
+```php
+<?php get_header() ?>
+```

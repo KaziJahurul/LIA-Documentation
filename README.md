@@ -250,3 +250,16 @@ function get_terms($postID, $term) {
 ```php
 <?php get_header() ?>
 ```
+
+## Add Full Site Editing (FSE)
+
+*add this code to functions.php for unlocking full site editing*
+
+```php 
+
+function mytheme_setup() {
+    add_theme_support('block-bases-theme');
+}
+
+add_action('after_setup_theme', 'mytheme_setup');
+```

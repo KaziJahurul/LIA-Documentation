@@ -251,6 +251,8 @@ function get_terms($postID, $term) {
 <?php get_header() ?>
 ```
 
+---
+
 ## Add Full Site Editing (FSE)
 
 *add this code to functions.php for unlocking full site editing*

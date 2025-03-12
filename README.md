@@ -41,7 +41,7 @@ function widget_setup() {
             'id' => 'sidebar-1',
             'class' => 'custom',
             'description' => 'Standard Sidebar',
-            'before_widget' => '<aside id="%1s" class="widget %2s">',
+            'before_widget' => '<aside id="%1$s" class="widget %2$s">',
             'after_widget' => '</aside>',
             'before_title' => '<h1 class="widget-title">',
             'after_title' => '</h1>'
@@ -50,7 +50,7 @@ function widget_setup() {
     )
 }
 
-add_function('widgets_init', 'awesome_widget_setup');
+add_function('widgets_init', 'widget_setup');
 ```
 
 *add to sidebar.php*
@@ -153,12 +153,12 @@ function custom_taxonomies() {
 
     $args = array(
         'hierarchical' => true,
-        'labels' => $labels,
+        'labels' => $label,
         'show_ui' => true,
         'show_admin_column' => true,
         'query_var' => true,
         'rewrite' => array('slug' => 'field')
-    )
+    );
 
     register_taxonomy('field', array('portfolio'), $args);
 
@@ -194,8 +194,8 @@ function get_terms($postID, $term) {
 *and then add this to html to display all of them*
 
 ```php
-<?php echo aweseme_get_terms($post->ID, 'field')?> ||
-<?php echo aweseme_get_terms($post->ID, 'software')?>
+<?php echo get_terms($post->ID, 'field')?> ||
+<?php echo get_terms($post->ID, 'software')?>
 <?php
     if (current_user_can('manage_options')) {
         echo '|| '; edit_post_link();
@@ -260,7 +260,7 @@ function get_terms($postID, $term) {
 ```php 
 
 function mytheme_setup() {
-    add_theme_support('block-bases-theme');
+    add_theme_support('block-based-theme');
 }
 
 add_action('after_setup_theme', 'mytheme_setup');

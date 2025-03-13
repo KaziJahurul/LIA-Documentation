@@ -265,3 +265,75 @@ function mytheme_setup() {
 
 add_action('after_setup_theme', 'mytheme_setup');
 ```
+
+---
+
+
+## Adding a code based Template
+
+Create a folder called "templates" and add the names of the custom templates in there. Then you will be able to find your custom template in your FSE page at Appereance -> Editor -> Templates
+
+## Adding a code based Pattern
+
+Create a folder called "patterns" and add the name of your custom pattern. (Can cause "desynced" problems in wordpress). Then you will be able to find your custom pattern in your FSE page at Appereance -> Editor -> Patterns
+
+--- 
+
+
+## Differences between Post, Page and Template
+
+### Post
+
+*content components*
+
+is where you for example add a person with their name, photo, job title and description. If you want to add a different person, you create a new post. Or you can add a recipe with all the ingredients as well as photos. Posts are for content that regularly updates.
+
+### Page 
+
+*display of content components*
+
+is where you display the posts that you have created. It can be a page about displaying a bunch of recipes or portfolio of art that you have created. You can also create a Privacy Policy page and other pages that are necessary.
+
+### Template
+
+*overall layout of a page*
+
+you create templates as a basic layout for each type of page that you have. In the template you don't really display the content itself, instead you include other content such as the Header and Footer. You always create an Index template, Index will be the fallback for if your other template is broken or doesn't exist. Other templates can for example be Home, Front Page, Portfolio, 404 page and Portfolio.
+
+
+## Add support for comments on custom posts and custom template
+
+To add support for comments you need to add 'comments' in the supports array of your custom post
+
+```php
+'supports' => array(
+    'title',
+    'editor',
+    'excerpt',
+    'thumbnail',
+    'revisions',
+    'comments',
+),
+```
+
+then add this function (replace 'custom_post_name' with the actual custom post name)
+
+```php 
+function enable_comments_rest_support() {
+    global $wp_post_types;
+    if (isset($wp_post_types['custom_post_name'])) {
+        $wp_post_types['custom_post_name']->show_in_rest = true;
+        $wp_post_types['custom_post_name']->supports[] = 'comments';
+    }
+}
+
+add_action('init', 'enable_comments_rest_support', 11);
+```
+
+then you can either add the comments block in the custom template like this
+
+```
+<!-- wp:comments /-->
+```
+
+or just add it directly in FSE

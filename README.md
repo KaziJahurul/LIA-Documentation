@@ -299,3 +299,41 @@ is where you display the posts that you have created. It can be a page about dis
 *overall layout of a page*
 
 you create templates as a basic layout for each type of page that you have. In the template you don't really display the content itself, instead you include other content such as the Header and Footer. You always create an Index template, Index will be the fallback for if your other template is broken or doesn't exist. Other templates can for example be Home, Front Page, Portfolio, 404 page and Portfolio.
+
+
+## Add support for comments on custom posts and custom template
+
+To add support for comments you need to add 'comments' in the supports array of your custom post
+
+```php
+'supports' => array(
+    'title',
+    'editor',
+    'excerpt',
+    'thumbnail',
+    'revisions',
+    'comments',
+),
+```
+
+then add this function (replace 'custom_post_name' with the actual custom post name)
+
+```php 
+function enable_comments_rest_support() {
+    global $wp_post_types;
+    if (isset($wp_post_types['custom_post_name'])) {
+        $wp_post_types['custom_post_name']->show_in_rest = true;
+        $wp_post_types['custom_post_name']->supports[] = 'comments';
+    }
+}
+
+add_action('init', 'enable_comments_rest_support', 11);
+```
+
+then you can either add the comments block in the custom template like this
+
+```
+<!-- wp:comments /-->
+```
+
+or just add it directly in FSE

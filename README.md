@@ -265,3 +265,37 @@ function mytheme_setup() {
 
 add_action('after_setup_theme', 'mytheme_setup');
 ```
+
+---
+
+
+## Adding a code based Template
+
+Create a folder called "templates" and add the names of the custom templates in there. Then you will be able to find your custom template in your FSE page at Appereance -> Editor -> Templates
+
+## Adding a code based Pattern
+
+Create a folder called "patterns" and add the name of your custom pattern. (Can cause "desynced" problems in wordpress). Then you will be able to find your custom pattern in your FSE page at Appereance -> Editor -> Patterns
+
+--- 
+
+
+## Differences between Post, Page and Template
+
+### Post
+
+*content components*
+
+is where you for example add a person with their name, photo, job title and description. If you want to add a different person, you create a new post. Or you can add a recipe with all the ingredients as well as photos. Posts are for content that regularly updates.
+
+### Page 
+
+*display of content components*
+
+is where you display the posts that you have created. It can be a page about displaying a bunch of recipes or portfolio of art that you have created. You can also create a Privacy Policy page and other pages that are necessary.
+
+### Template
+
+*overall layout of a page*
+
+you create templates as a basic layout for each type of page that you have. In the template you don't really display the content itself, instead you include other content such as the Header and Footer. You always create an Index template, Index will be the fallback for if your other template is broken or doesn't exist. Other templates can for example be Home, Front Page, Portfolio, 404 page and Portfolio.

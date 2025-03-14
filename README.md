@@ -337,3 +337,77 @@ then you can either add the comments block in the custom template like this
 ```
 
 or just add it directly in FSE
+
+---
+
+## Add custom Taxonomy to a custom post
+
+In this example I'm adding the custom taxonomy "Language" to my custom post "Projects"
+
+*The taxonomy being hierarchical basically makes it into a category, if you want to make it into a tag, you change "hierearchical" to false*
+
+```php
+function awesome_custom_taxonomies() {
+
+    // add new taxonomy hierarchical
+    $labels = array(
+        'name' => 'Fields',
+        'singular_name' => 'Field',
+        'search_items' => 'Search Fields',
+        'all_items' => 'All Fields',
+        'parent_item' => 'Parent Field',
+        'parent_item_colon' => 'Parent Field:',
+        'edit_item' => 'Edit Field',
+        'update_item' => 'Update Field',
+        'add_new_item' => 'Add New Field',
+        'new_item_name' => 'New Field Name',
+        'menu_name' => 'Field'
+    );
+
+    $args = array(
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'field')
+    );
+
+    // add new taxonomy, hierarchical
+    register_taxonomy('language', 'projects', array(
+        'label' => 'Language',
+        'rewrite' => array('slug' => 'language'),
+        'hierarchical' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'show_in_rest' => true,
+    ));
+}
+```
+
+To make the custom taxonomy available in the column of the posts, you add this
+
+```php
+// Add custom taxonomy column to the admin dashboard for 'projects'
+function add_language_column($columns) {
+    $columns['language'] = __('Language', 'my-cool-theme'); // Add a new column for the 'Language' taxonomy
+    return $columns;
+}
+add_filter('manage_projects_posts_columns', 'add_language_column');
+
+// Populate the 'Language' column with the assigned terms
+function populate_language_column($column, $post_id) {
+    if ($column === 'language') {
+        $terms = get_the_terms($post_id, 'language'); // Get the terms for the 'language' taxonomy
+        if (!empty($terms) && !is_wp_error($terms)) {
+            $term_links = array_map(function($term) {
+                return sprintf('<a href="%s">%s</a>', esc_url(get_edit_term_link($term->term_id, 'language')), esc_html($term->name));
+            }, $terms);
+            echo implode(', ', $term_links); // Display the terms as links
+        } else {
+            echo __('No Language Assigned', 'my-cool-theme'); // Fallback if no terms are assigned
+        }
+    }
+}
+add_action('manage_projects_posts_custom_column', 'populate_language_column', 10, 2);
+```

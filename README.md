@@ -411,3 +411,15 @@ function populate_language_column($column, $post_id) {
 }
 add_action('manage_projects_posts_custom_column', 'populate_language_column', 10, 2);
 ```
+
+---
+
+## Unlock Application Password for Database API tests in Postman
+
+```php
+add_filter( 'wp_is_application_passwords_available', '__return_true' );
+```
+
+Then go to wordpress dashboard -> Users -> Profile and you will be able to create a new Application Password at the bottom of the page. 
+
+Then add it to Postman under Authorization -> choose Basic Auth and paste the password and use the Username for your Sql database.

@@ -265,3 +265,222 @@ function mytheme_setup() {
 
 add_action('after_setup_theme', 'mytheme_setup');
 ```
+
+---
+
+
+## Adding a code based Template
+
+Create a folder called "templates" and add the names of the custom templates in there. Then you will be able to find your custom template in your FSE page at Appereance -> Editor -> Templates
+
+## Adding a code based Pattern
+
+Create a folder called "patterns" and add the name of your custom pattern. (Can cause "desynced" problems in wordpress). Then you will be able to find your custom pattern in your FSE page at Appereance -> Editor -> Patterns
+
+--- 
+
+
+## Differences between Post, Page and Template
+
+### Post
+
+*content components*
+
+is where you for example add a person with their name, photo, job title and description. If you want to add a different person, you create a new post. Or you can add a recipe with all the ingredients as well as photos. Posts are for content that regularly updates.
+
+### Page 
+
+*display of content components*
+
+is where you display the posts that you have created. It can be a page about displaying a bunch of recipes or portfolio of art that you have created. You can also create a Privacy Policy page and other pages that are necessary.
+
+### Template
+
+*overall layout of a page*
+
+you create templates as a basic layout for each type of page that you have. In the template you don't really display the content itself, instead you include other content such as the Header and Footer. You always create an Index template, Index will be the fallback for if your other template is broken or doesn't exist. Other templates can for example be Home, Front Page, Portfolio, 404 page and Portfolio.
+
+
+## Add support for comments on custom posts and custom template
+
+To add support for comments you need to add 'comments' in the supports array of your custom post
+
+```php
+'supports' => array(
+    'title',
+    'editor',
+    'excerpt',
+    'thumbnail',
+    'revisions',
+    'comments',
+),
+```
+
+then add this function (replace 'custom_post_name' with the actual custom post name)
+
+```php 
+function enable_comments_rest_support() {
+    global $wp_post_types;
+    if (isset($wp_post_types['custom_post_name'])) {
+        $wp_post_types['custom_post_name']->show_in_rest = true;
+        $wp_post_types['custom_post_name']->supports[] = 'comments';
+    }
+}
+
+add_action('init', 'enable_comments_rest_support', 11);
+```
+
+then you can either add the comments block in the custom template like this
+
+```
+<!-- wp:comments /-->
+```
+
+or just add it directly in FSE
+
+---
+
+## Add custom Taxonomy to a custom post
+
+In this example I'm adding the custom taxonomy "Language" to my custom post "Projects"
+
+*The taxonomy being hierarchical basically makes it into a category, if you want to make it into a tag, you change "hierearchical" to false*
+
+```php
+function awesome_custom_taxonomies() {
+
+    // add new taxonomy hierarchical
+    $labels = array(
+        'name' => 'Fields',
+        'singular_name' => 'Field',
+        'search_items' => 'Search Fields',
+        'all_items' => 'All Fields',
+        'parent_item' => 'Parent Field',
+        'parent_item_colon' => 'Parent Field:',
+        'edit_item' => 'Edit Field',
+        'update_item' => 'Update Field',
+        'add_new_item' => 'Add New Field',
+        'new_item_name' => 'New Field Name',
+        'menu_name' => 'Field'
+    );
+
+    $args = array(
+        'hierarchical' => true,
+        'labels' => $labels,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'field')
+    );
+
+    // add new taxonomy, hierarchical
+    register_taxonomy('language', 'projects', array(
+        'label' => 'Language',
+        'rewrite' => array('slug' => 'language'),
+        'hierarchical' => true,
+        'show_ui' => true,
+        'show_admin_column' => true,
+        'show_in_rest' => true,
+    ));
+}
+```
+
+To make the custom taxonomy available in the column of the posts, you add this
+
+```php
+// Add custom taxonomy column to the admin dashboard for 'projects'
+function add_language_column($columns) {
+    $columns['language'] = __('Language', 'my-cool-theme'); // Add a new column for the 'Language' taxonomy
+    return $columns;
+}
+add_filter('manage_projects_posts_columns', 'add_language_column');
+
+// Populate the 'Language' column with the assigned terms
+function populate_language_column($column, $post_id) {
+    if ($column === 'language') {
+        $terms = get_the_terms($post_id, 'language'); // Get the terms for the 'language' taxonomy
+        if (!empty($terms) && !is_wp_error($terms)) {
+            $term_links = array_map(function($term) {
+                return sprintf('<a href="%s">%s</a>', esc_url(get_edit_term_link($term->term_id, 'language')), esc_html($term->name));
+            }, $terms);
+            echo implode(', ', $term_links); // Display the terms as links
+        } else {
+            echo __('No Language Assigned', 'my-cool-theme'); // Fallback if no terms are assigned
+        }
+    }
+}
+add_action('manage_projects_posts_custom_column', 'populate_language_column', 10, 2);
+```
+
+---
+
+## Unlock Application Password for Database API tests in Postman
+
+*add this in wp-config.php*
+
+```php
+define( 'WP_ENVIRONMENT_TYPE', 'staging' );
+define( 'WP_ALLOW_APPLICATION_PASSWORDS', true );
+```
+
+
+*add this in functions.php*
+```php
+add_filter( 'wp_is_application_passwords_available', '__return_true' );
+```
+
+Then go to wordpress dashboard -> Users -> Profile and you will be able to create a new Application Password at the bottom of the page. 
+
+Then add it to Postman under Authorization -> choose Basic Auth and paste the password and use the Username for your Sql database.
+
+---
+
+## Add custom api endpoint
+
+*add this to functions.php*
+
+This code calls for an author in the custom post called Projects. If you want to call for the default Posts, remove " 'post_type' => 'projects'
+
+The URL for using this endpoint looks like this
+```
+http://localhost:8000/wp-json/my-endpoint/v1/author/1
+```
+
+The result should display all the posts that are created by the user with id 1.
+
+This code also filters the result after the title, to change to something else you switch "return $post->post_title" to "post_date" for filtering by date. Or if you want all the data for each post, then change to "return $posts".
+
+```php
+function my_awesome_func( $data ) {
+    $posts = get_posts( array(
+        'post_type' => 'projects',
+        'author' => $data['id'],
+        'numberposts' => -1,
+    ));
+
+    if ( empty( $posts ) ) {
+        return new WP_Error( 'no_author', 'Invalid author', array( 'status' => 404 ) );
+    }
+
+    return array_map(function($post) {
+        return $post->post_title;
+    }, $posts);
+}
+
+add_action('rest_api_init', function () {
+    register_rest_route( 'my-endpoint/v1', '/author/(?P<id>\d+)', array(
+        'methods' => 'GET',
+        'callback' => 'my_awesome_func',
+        'args' => array(
+            'id' => array(
+                'validate_callback' => function($param, $request, $key) {
+                    return is_numeric($param);
+                }
+            )
+        ),
+        'permission_callback' => function () {
+            return true;
+        }
+    ));
+});
+```

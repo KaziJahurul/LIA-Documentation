@@ -416,6 +416,15 @@ add_action('manage_projects_posts_custom_column', 'populate_language_column', 10
 
 ## Unlock Application Password for Database API tests in Postman
 
+*add this in wp-config.php*
+
+```php
+define( 'WP_ENVIRONMENT_TYPE', 'staging' );
+define( 'WP_ALLOW_APPLICATION_PASSWORDS', true );
+```
+
+
+*add this in functions.php*
 ```php
 add_filter( 'wp_is_application_passwords_available', '__return_true' );
 ```
@@ -423,3 +432,55 @@ add_filter( 'wp_is_application_passwords_available', '__return_true' );
 Then go to wordpress dashboard -> Users -> Profile and you will be able to create a new Application Password at the bottom of the page. 
 
 Then add it to Postman under Authorization -> choose Basic Auth and paste the password and use the Username for your Sql database.
+
+---
+
+## Add custom api endpoint
+
+*add this to functions.php*
+
+This code calls for an author in the custom post called Projects. If you want to call for the default Posts, remove " 'post_type' => 'projects'
+
+The URL for using this endpoint looks like this
+```
+http://localhost:8000/wp-json/my-endpoint/v1/author/1
+```
+
+The result should display all the posts that are created by the user with id 1.
+
+This code also filters the result after the title, to change to something else you switch "return $post->post_title" to "post_date" for filtering by date. Or if you want all the data for each post, then change to "return $posts".
+
+```php
+function my_awesome_func( $data ) {
+    $posts = get_posts( array(
+        'post_type' => 'projects',
+        'author' => $data['id'],
+        'numberposts' => -1,
+    ));
+
+    if ( empty( $posts ) ) {
+        return new WP_Error( 'no_author', 'Invalid author', array( 'status' => 404 ) );
+    }
+
+    return array_map(function($post) {
+        return $post->post_title;
+    }, $posts);
+}
+
+add_action('rest_api_init', function () {
+    register_rest_route( 'my-endpoint/v1', '/author/(?P<id>\d+)', array(
+        'methods' => 'GET',
+        'callback' => 'my_awesome_func',
+        'args' => array(
+            'id' => array(
+                'validate_callback' => function($param, $request, $key) {
+                    return is_numeric($param);
+                }
+            )
+        ),
+        'permission_callback' => function () {
+            return true;
+        }
+    ));
+});
+```
